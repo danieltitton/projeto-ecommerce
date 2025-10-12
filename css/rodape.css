@@ -45,16 +45,17 @@
 }
 
 @media (min-width: 1024px) {
-    .rodape .container {
-        flex-direction: row;
-        width: 100%;
-        gap: 13rem;
-        padding: 4rem 1rem;      
-    }
+  .rodape .container {
+    flex-direction: row;
+    width: 100%;
+    gap: 13rem;
+    padding: 4rem 1rem;
+  }
+}
 
-    @media (min-width: 1120px) {
-        .rodape .container {
-            width: 1170px;
-            margin: 0 auto;
-        }
-    }}
+@media (min-width: 1200px) {
+  .rodape .container {
+    width: 1170px;
+    margin: 0 auto;
+  }
+}
