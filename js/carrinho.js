@@ -29,4 +29,16 @@ Passo 4: atualizar valor total do carrinho
 // - Parte 1: vamos adicionar +1 no icone do carrinho
 // Passo 1: pegar os botoes de adicionar ao carrinho no HTML
 
-const botoesAdicionarCarrinho = document.querySelectorAll('.adicionar-carrinho');
+const botoesAdicionarAoCarrinho = document.querySelectorAll('.adicionar-ao-carrinho');
+
+// Passo 2: adicionar um evento de escuta nesses botoes pra quando clicar disparar uma ação
+
+
+botoesAdicionarAoCarrinho.forEach(botao=>{
+    botao.addEventListener('click', (evento)=>{
+        console.log('Botão de adicionar ao carrinho clicado');
+        //
+    });
+});
+
+//passo 3: pegar as informações do produto clicado e adicionar ao localstorage
