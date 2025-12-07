@@ -6,6 +6,7 @@
     height: 100%;
     overflow: hidden;
     display: none;
+    visibility: hidden;
 }
 
 .modal.is-open {
