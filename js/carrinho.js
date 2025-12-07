@@ -1,91 +1,108 @@
 const botoesAdicionarAoCarrinho = document.querySelectorAll(".adicionar-ao-carrinho");
 
-// Passo 2: adicionar um evento de escuta nesses botoes pra quando clicar disparar uma ação
-
-
+// OBJETIVO 1: Adicionar produtos ao carrinho
+// Adiciona evento de clique em todos os botões "Adicionar ao Carrinho"
 botoesAdicionarAoCarrinho.forEach(botao => {
     botao.addEventListener("click", evento => {
-        //passo 3: pegar as informações do produto clicado e adicionar ao localstorage
+        // Extrai dados do produto a partir do elemento DOM
         const elementoProduto = evento.target.closest(".produto");
-        const produtoId = elementoProduto.dataset.id;
-        const produtoNome = elementoProduto.querySelector(".nome").textContent;
-        const produtoImagem = elementoProduto.querySelector("img").getAttribute("src");
-        const produtoPreco = parseFloat(elementoProduto.querySelector(".preco").textContent.replace("R$ ","").replace(".","").replace(",", "."));
+        const dadosProduto = extrairDadosProduto(elementoProduto);
 
-        //buscar a lista de produtos no localstorage
-
+        // Obtém carrinho atual e adiciona/atualiza o produto
         const carrinho = obterProdutosDoCarrinho();
-        //testar se o produto ja existe no carrinho
-        const existeProduto = carrinho.find(produto => produto.id === produtoId);
+        adicionarOuAtualizarProdutoNoCarrinho(carrinho, dadosProduto);
 
-        if (existeProduto) {
-            existeProduto.quantidade += 1;
-        } else {
-            const produto = {
-                id: produtoId,
-                nome: produtoNome,  
-                imagem: produtoImagem,
-                preco: produtoPreco,
-                quantidade: 1,
-            };
-            carrinho.push(produto);
-        }   
-        //salvar o carrinho atualizado no localstorage
-       salvarProdutosNoCarrinho(carrinho);
-       atualizarCarrinhoETabela();
+        // Salva mudanças e atualiza a interface
+        salvarProdutosNoCarrinho(carrinho);
+        atualizarCarrinhoETabela();
     }); 
 });
 
+// FUNÇÃO AUXILIAR: Extrai informações do produto do DOM
+// Melhoria: Centralizou a lógica de extração em uma função reutilizável
+function extrairDadosProduto(elementoProduto) {
+    // Remove caracteres especiais do preço para converter corretamente em número
+    const preco = elementoProduto.querySelector(".preco").textContent
+        .replace("R$ ", "")
+        .replace(".", "")
+        .replace(",", ".");
+
+    return {
+        id: elementoProduto.dataset.id,
+        nome: elementoProduto.querySelector(".nome").textContent,
+        imagem: elementoProduto.querySelector("img").getAttribute("src"),
+        preco: parseFloat(preco),
+    };
+}
+
+// FUNÇÃO AUXILIAR: Adiciona ou atualiza produto no carrinho
+// Melhoria: Separou a lógica de adicionar/atualizar do evento principal
+function adicionarOuAtualizarProdutoNoCarrinho(carrinho, dadosProduto) {
+    const existeProduto = carrinho.find(produto => produto.id === dadosProduto.id);
+
+    if (existeProduto) {
+        existeProduto.quantidade += 1;
+    } else {
+        carrinho.push({
+            ...dadosProduto,
+            quantidade: 1,
+        });
+    }
+}
+
+
+// FUNÇÕES DE GERENCIAMENTO DO LOCALSTORAGE
+// Melhoria: Separou a lógica de persistência em funções bem nomeadas
+
+// Salva o carrinho no localStorage como JSON
 function salvarProdutosNoCarrinho(carrinho) {
     localStorage.setItem("carrinho", JSON.stringify(carrinho));
 }   
 
+// Recupera o carrinho do localStorage com tratamento de erros
+// Melhoria: Adicionada verificação para evitar JSON.parse("undefined")
 function obterProdutosDoCarrinho() {
     const produtos = localStorage.getItem("carrinho");
-    return produtos ? JSON.parse(produtos) : [];
-
+    return (produtos && produtos !== "undefined") ? JSON.parse(produtos) : [];
 }
 
-//passo 4: atualizar o contador do carrinho de compras
+// OBJETIVO 2: Atualizar a interface do carrinho
+
+// Atualiza o contador de itens no ícone do carrinho
+// Melhoria: Extraído em função separada para reutilização
 function atualizarContadorCarrinho() {
     const produtos = obterProdutosDoCarrinho();
-    let total = 0;
-
-    produtos.forEach(produto => {
-        total += produto.quantidade;
-    });
-
+    const total = produtos.reduce((acc, produto) => acc + produto.quantidade, 0);
     document.getElementById("contador-carrinho").textContent = total;
+}
 
-} 
-
-
-//passo 5: renderizar a tabela do carrinho de compras
+// Renderiza a tabela do carrinho com todos os produtos
+// Melhoria: Usa template literals para melhor legibilidade
 function renderizarTabelaDoCarrinho() {
     const produtos = obterProdutosDoCarrinho();
     const corpoTabela = document.querySelector("#modal-1-content table tbody");
 
-    corpoTabela.innerHTML = ""; //limpar tabela antes de renderizar
+    corpoTabela.innerHTML = ""; // Limpa tabela antes de renderizar
 
     produtos.forEach(produto => {
         const tr = document.createElement("tr");
-        tr.innerHTML = `<td class="td-produto">
-            <img
-                src="${produto.imagem}"
-                alt="${produto.nome}"/>
-        </td>
-        <td>${produto.nome}</td>
-        <td class="td-preco-unitario">R$ ${produto.preco.toFixed(2).replace(".", ",")}</td>
-        <td class="td-quantidade">
-            <input type="number" class="input-quantidade" data-id="${produto.id}" value="${produto.quantidade}" min="1" />
-        </td>
-            <td class="td-preco-total">R$ ${(produto.preco * produto.quantidade).toFixed(2).replace(".",",")}</td>
-            <td><button class="btn-remover" data-id="${produto.id}" id="deletar"></button></td>`;
+        const precoUnitario = produto.preco.toFixed(2).replace(".", ",");
+        const precoTotal = (produto.preco * produto.quantidade).toFixed(2).replace(".", ",");
+
+        tr.innerHTML = `
+            <td class="td-produto">
+                <img src="${produto.imagem}" alt="${produto.nome}"/>
+            </td>
+            <td>${produto.nome}</td>
+            <td class="td-preco-unitario">R$ ${precoUnitario}</td>
+            <td class="td-quantidade">
+                <input type="number" class="input-quantidade" data-id="${produto.id}" value="${produto.quantidade}" min="1" />
+            </td>
+            <td class="td-preco-total">R$ ${precoTotal}</td>
+            <td><button class="btn-remover" data-id="${produto.id}" id="deletar"></button></td>
+        `;
         corpoTabela.appendChild(tr);
     });
-    
-    
-
 }
 
 
@@ -139,7 +156,7 @@ function removerProdutoDoCarrinho(id) {
 // passo 3 atualizar o valor total do carrinho
 function atualizarValorTotalCarrinho() {
     const produtos = obterProdutosDoCarrinho();
-    let = total = 0;
+    let total = 0;
 
     produtos.forEach(produto => {
         total += produto.preco * produto.quantidade;
