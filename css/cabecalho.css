@@ -111,10 +111,9 @@ padding:  0 1rem;
         flex-direction: row;
     }
 
-}
-
-.menu-hamburguer {
-    display: none;
+    .menu-hamburguer {
+        display: none;
+    }
 }
 
 .cabecalho .menu-principal ul {
