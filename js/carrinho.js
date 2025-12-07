@@ -98,10 +98,9 @@ atualizarContadorCarrinho();
 
 //passo 5: renderizar a tabela do carrinho de compras
 function renderizarTabelaDoCarrinho() {
-    const carrinho = obterProdutosDoCarrinho();
-    const corpoTabela = document.querySelector("#modal-1-content tbody");
+    const produtos = obterProdutosDoCarrinho();
+    const corpoTabela = document.querySelector("#modal-1-content table tbody");
 
-    console.log(corpoTabela);
     corpoTabela.innerHTML = ""; //limpar tabela antes de renderizar
 
     produtos.forEach(produto => {
@@ -109,7 +108,7 @@ function renderizarTabelaDoCarrinho() {
         tr.innerHTML = `<td class="td-produto">
         <img
         src="${produto.imagem}"
-        alt="${produto.nome}">
+        alt="${produto.nome}"/>
         </td>
         <td>${produto.nome}</td>
         <td class="td-preco-unitario">R$ ${produto.preco.toFixed(2).replace(".", ",")}</td>
@@ -125,4 +124,29 @@ function renderizarTabelaDoCarrinho() {
 
 }
 
+salvarCarrinho(carrinho);
 renderizarTabelaDoCarrinho();
+
+//Objetivo 2 - remover produtos do carrinho
+//Passo 1: pegar botao de deletar do HTML
+
+const corpoTabela = document.querySelector("#modal-1-content table tbody");
+corpoTabela.addEventListener("click", evento => {
+    if (evento.target.classList.contains("btn-remover")) {
+        const id = evento.target.dataset.id;
+        removerProdutoDoCarrinho(id);
+    }
+
+    
+})
+
+function removerProdutoDoCarrinho(id) {
+    const produtos = obterProdutosDoCarrinho();
+
+    //filtrar os produtos que nao tem id passado por parametro
+    const carrinhoAtualizado = produtos.filter(produto => produto.id !== id);
+
+    salvarProdutosNoCarrinho(carrinhoAtualizado);
+    atualizarContadorCarrinho();
+    renderizarTabelaDoCarrinho();
+}
